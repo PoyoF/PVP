@@ -1,7 +1,5 @@
-os
 pillow
 numpy
-logging
 streamlit
 colormath
 opencv-python
