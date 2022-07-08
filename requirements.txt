@@ -2,4 +2,4 @@ pillow
 numpy
 streamlit
 colormath
-opencv-python
+opencv-python-headless
