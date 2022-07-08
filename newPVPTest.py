@@ -5,8 +5,8 @@ import numpy as np
 from colormath.color_objects import XYZColor, sRGBColor, xyYColor
 from colormath.color_conversions import convert_color
 LuminanceRange=0.2 # 輝度変化範囲(-0.27～0.47)
-originalCWD=os.getcwd()
-TopFolder='C:\\imgs2\\' # 動画を置くところ
+#originalCWD=os.getcwd()
+#TopFolder='C:\\imgs2\\' # 動画を置くところ
 #変換関数
 def xyY2sRGB(xyY):# xyY⇒RGB変換
     return convert_color(xyY, sRGBColor, target_illuminant='d50')
@@ -122,7 +122,7 @@ path=('S' if(stripeON) else 'N')+str(fps)+'c'+str(CenterLuminance)+'r'+str(Lumin
 def makeTestImages(p,path):
     global stripeON
     pushedCWD=os.getcwd()
-    os.chdir(TopFolder)
+    #os.chdir(TopFolder)
     dataDir=p['name']
     filename = path+list(dataDir)[0]+'x='+str(p['p1'].xyy_x)+'y='+str(p['p1'].xyy_y)+"⇔"+'x='+str(p['p2'].xyy_x)+'y='+str(p['p2'].xyy_y)#ファイル名生成
     imgp1 = np.zeros((H,W,3), np.uint8)
@@ -142,7 +142,7 @@ def makeTestImages(p,path):
             imgp1BGR = cv2.line(imgp1BGR,(k*dW,0),(k*dW,H-1),(0,0,0),1)
             imgp2BGR = cv2.line(imgp2BGR,(k*dW,0),(k*dW,H-1),(0,0,0),1)
     print(filename)
-    os.chdir(pushedCWD)
+    #os.chdir(pushedCWD)
     return imgp1BGR,imgp2BGR
 
 from PIL import Image
