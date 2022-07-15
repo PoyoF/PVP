@@ -1,10 +1,9 @@
-#import sys
-import os
 import cv2
 import numpy as np
 from colormath.color_objects import XYZColor, sRGBColor, xyYColor
 from colormath.color_conversions import convert_color
-LuminanceRange=0.2 # 輝度変化範囲(-0.27～0.47)
+LuminanceRange=0.1 # 輝度変化範囲(-0.17～0.37)
+#LuminanceRange=0.2 # 輝度変化範囲(-0.27～0.47)
 #originalCWD=os.getcwd()
 #TopFolder='C:\\imgs2\\' # 動画を置くところ
 #変換関数
@@ -121,7 +120,7 @@ path=('S' if(stripeON) else 'N')+str(fps)+'c'+str(CenterLuminance)+'r'+str(Lumin
 ####################################################
 def makeTestImages(p,path):
     global stripeON
-    pushedCWD=os.getcwd()
+    #pushedCWD=os.getcwd()
     #os.chdir(TopFolder)
     dataDir=p['name']
     filename = path+list(dataDir)[0]+'x='+str(p['p1'].xyy_x)+'y='+str(p['p1'].xyy_y)+"⇔"+'x='+str(p['p2'].xyy_x)+'y='+str(p['p2'].xyy_y)#ファイル名生成
@@ -152,6 +151,7 @@ st.title("PVP Viewer")
 import cv2
 from PIL import Image
 import numpy as np
+# Streamlitの用意
 PlaceHolderP = st.empty()
 with PlaceHolderP.container():
     imageP=st.empty()
@@ -160,7 +160,7 @@ PlaceHolderT = st.empty()
 with PlaceHolderT.container():
     imageT=st.empty()
     posT = st.slider("Position", min_value=0, max_value=500, step=1, value=250,key='T')
-
+#配列変換
 def cv2pil(image):# OpenCV型 -> PIL型
     return Image.fromarray(image.copy())
 def pil2cv(image):# PIL型 -> OpenCV型
@@ -181,15 +181,34 @@ blk=pil2cv(black)
 blackBar = blk[:,posT:posT+20]
 h, w = imageAT.shape[:2]
 count=0
-def aFrame(imageA,imageB,pos,count):
+def bFrame(img,pos):
     global h,v,blackBar
     M = np.array([[1, 0, pos-25], [0, 1, 0]], dtype=float)
     M2 = np.array([[1, 0, pos+5], [0, 1, 0]], dtype=float)
-    if(count%2):
-        tmp = cv2.warpAffine(blackBar, M, (w, h),imageA, borderMode=cv2.BORDER_TRANSPARENT)
-    else:
-        tmp = cv2.warpAffine(blackBar, M, (w, h),imageB, borderMode=cv2.BORDER_TRANSPARENT)
+    tmp = cv2.warpAffine(blackBar, M, (w, h),img.copy(), borderMode=cv2.BORDER_TRANSPARENT)
     return cv2pil(cv2.warpAffine(blackBar, M2, (w, h),tmp, borderMode=cv2.BORDER_TRANSPARENT))
+
+def atFrame(pos,count):
+    global AT,BT
+    if(count%2):
+        return AT[pos]
+    else:
+        return BT[pos]
+def apFrame(pos,count):
+    global AP,BP
+    if(count%2):
+        return AP[pos]
+    else:
+        return BP[pos]
+AT=[]
+BT=[]
+AP=[]
+BP=[]
+for pos in range(500):
+    AT.append(bFrame(imageAT,pos))
+    BT.append(bFrame(imageBT,pos))
+    AP.append(bFrame(imageAP,pos))
+    BP.append(bFrame(imageBP,pos))
 if 'count' not in st.session_state:
   st.session_state["count"] = 0
   
@@ -198,8 +217,8 @@ if (st.button('OK', key='G')):
     print("posT: ",posT,"    posP: ",posP)
 
 while(True):
-    imageT.image(aFrame(imageAT,imageBT,posT,count), caption='tritanope')  #use_column_width=True
-    imageP.image(aFrame(imageAP,imageBP,posP,count), caption='protanope')  #use_column_width=True
+    imageT.image(atFrame(posT,count), caption='tritanope')  #use_column_width=True
+    imageP.image(apFrame(posP,count), caption='protanope')  #use_column_width=True
     count+=1
 
 cap.release()
